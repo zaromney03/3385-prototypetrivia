@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mustang News Weekly Trivia — Prototype</title>
+<style>
+:root{--ink:#121212;--muted:#6f6b64;--paper:#f5f2ec;--card:#fff;--line:#ddd7cc;--dark:#171717;--accent:#2f6c48;--soft:#efede8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Arial,sans-serif}
+header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+.nav{max-width:1200px;margin:auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.brand{font-family:Georgia,serif;font-weight:800;font-size:25px} .brand span{font-weight:400}
+.tabs{display:flex;gap:8px} .tabs button{border:0;background:transparent;padding:10px 14px;border-radius:999px;font-weight:800;cursor:pointer} .tabs button.active{background:var(--dark);color:#fff}
+main{max-width:1200px;margin:auto;padding:30px 24px 70px}
+h1,h2,h3,h4{font-family:Georgia,serif} h1{font-size:42px;line-height:1.05;margin:0 0 10px} h2{margin:0 0 6px} .lede{color:var(--muted);max-width:760px;line-height:1.55}
+.grid{display:grid;grid-template-columns:1.5fr .8fr;gap:20px;margin-top:24px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 2px 9px #00000008}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px} .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+label,.label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:var(--muted);margin-bottom:7px}
+input,textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;color:inherit}
+textarea{min-height:100px;resize:vertical}
+.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:850;cursor:pointer} .primary{background:var(--dark);color:#fff} .green{background:var(--accent);color:#fff} .secondary{background:var(--soft);color:var(--ink)} .danger{background:#f7e8e8;color:#8c2626}
+.section-row{display:flex;flex-wrap:wrap;gap:8px} .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-weight:800;cursor:pointer} .chip.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+.library-tools{display:grid;grid-template-columns:1fr 180px 180px;gap:10px;margin-top:16px}
+.article-list{margin-top:14px;display:grid;gap:10px;max-height:650px;overflow:auto;padding-right:4px}
+.week-head{position:sticky;top:0;background:var(--paper);padding:8px 0 6px;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.article{display:grid;grid-template-columns:20px 1fr auto;gap:12px;align-items:start;border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;cursor:pointer}
+.article.selected{border-color:#111;box-shadow:0 0 0 1px #111}
+.article h4{margin:0 0 5px;font-size:17px;line-height:1.2} .meta,.small{font-size:12px;color:var(--muted);line-height:1.45}
+.source{font-size:12px;color:#222;text-decoration:underline;white-space:nowrap}
+.check{width:18px;height:18px;margin-top:2px}
+.selected-bar{margin-top:12px;padding:11px 12px;background:#f1efe9;border-radius:10px;font-size:13px;font-weight:700}
+.sticky-actions{position:sticky;bottom:0;margin-top:15px;padding-top:12px;border-top:1px solid var(--line);background:#fff;display:flex;justify-content:flex-end;gap:8px}
+.question{border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:12px;background:#fff}
+.qheader{display:flex;justify-content:space-between;gap:10px;align-items:center} .tag{font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.08em;background:#eee;padding:5px 8px;border-radius:999px}
+.option-row{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;margin-top:7px} .option-row input[type=radio]{width:18px;height:18px}
+.cover{width:100%;aspect-ratio:16/7;border-radius:18px;background:#1a1a1a;display:flex;align-items:flex-end;overflow:hidden;background-size:cover;background-position:center;color:#fff}
+.cover-overlay{width:100%;padding:75px 28px 28px;background:linear-gradient(transparent,#000c)} .cover h1{color:#fff;font-size:48px;margin:5px 0 0;max-width:850px}
+.game{max-width:860px;margin:auto} .quiz-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;margin-top:18px}
+.scoreline{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)} .quiz-q{font-family:Georgia,serif;font-size:28px;line-height:1.25;margin:18px 0}
+.choice{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:15px;margin-top:9px;font-size:16px;font-weight:750;cursor:pointer} .choice:hover{border-color:#111} .choice.correct{background:#edf6ef;border-color:var(--accent)} .choice.wrong{background:#fff0f0;border-color:#a73a3a}
+.hidden{display:none!important} .flex{display:flex;align-items:center;justify-content:space-between;gap:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.library-tools,.row3{grid-template-columns:1fr}.row{grid-template-columns:1fr}.cover h1{font-size:34px}}
+</style>
+</head>
+<body>
+<header>
+<div class="nav">
+<div class="brand">Mustang News <span>Weekly Trivia</span></div>
+<div class="tabs"><button id="editorTab" class="active" onclick="showView('editor')">Editor</button><button id="gameTab" onclick="showView('game')">Published Game</button></div>
+</div>
+</header>
+
+<main>
+<section id="editorView">
+<h1>Build this week’s quiz</h1>
+<p class="lede">Choose the week, filter Mustang News articles by section, add editorial key points, generate a draft, edit every answer choice, and publish the approved quiz.</p>
+
+<div class="grid">
+<div>
+<div class="panel">
+<div class="row">
+<div><label>Quiz week</label><select id="weekSelect" onchange="renderLibrary()"></select></div>
+<div><label>Number of questions</label><select id="questionCount"><option>5</option><option selected>8</option><option>10</option><option>12</option><option>15</option></select></div>
+</div>
+<div style="margin-top:18px"><label>Sections</label><div id="sectionChips" class="section-row"></div></div>
+</div>
+
+<div class="panel" style="margin-top:18px">
+<div class="flex"><div><h2>Mustang News article library</h2><div class="small">Articles currently indexed in this prototype from Mustang News’ published archive.</div></div><div id="selectedCount" class="small">0 selected</div></div>
+<div class="library-tools">
+<input id="searchBox" placeholder="Search titles or authors…" oninput="renderLibrary()">
+<select id="librarySection" onchange="syncSectionFromSelect();renderLibrary()"><option value="All">All sections</option><option>News</option><option>Campus</option><option>Sports</option><option>Opinion</option></select>
+<select id="sortOrder" onchange="renderLibrary()"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select>
+</div>
+<div id="selectedBar" class="selected-bar hidden"></div>
+<div id="articleList" class="article-list"></div>
+</div>
+</div>
+
+<aside>
+<div class="panel">
+<h2>Editor notes & key points</h2>
+<p class="small">These notes are kept with the quiz build and should guide question generation. The article library already includes starter key points from the selected stories.</p>
+<textarea id="notes" placeholder="Example: Make questions accessible to first-year students. Favor numbers, names, places and surprising facts."></textarea>
+<div style="margin-top:15px"><label>Weekly cover image</label><input id="coverInput" type="file" accept="image/*"></div>
+<div class="sticky-actions"><button class="btn primary" onclick="generateQuiz()">Generate questions</button></div>
+</div>
+<div class="panel" style="margin-top:18px">
+<h3>Editor workflow</h3>
+<div class="small">1. Select articles → 2. Add key points → 3. Generate → 4. Edit questions and distractors → 5. Mark the correct answer → 6. Publish.</div>
+</div>
+</aside>
+</div>
+
+<div id="draftPanel" class="panel hidden" style="margin-top:22px">
+<div class="flex"><div><h2>Draft questions</h2><div class="small">Every answer option is editable. The radio button marks the correct answer.</div></div><button class="btn green" onclick="publishQuiz()">Publish weekly quiz</button></div>
+<div id="drafts"></div>
+</div>
+</section>
+
+<section id="gameView" class="game hidden">
+<div id="gameCover" class="cover">
+<div class="cover-overlay"><div class="small" style="color:#ddd">MUSTANG NEWS • WEEKLY QUIZ</div><h1 id="gameTitle">Weekly News Quiz</h1></div>
+</div>
+<div id="gameArea"></div>
+</section>
+</main>
+
+<script>
+const ARTICLES = [{"id": "n1", "week": "Sept. 14–20, 2026", "section": "News", "date": "Sept. 18, 2026", "title": "San Luis Obispo County approved $167,000 of opioid settlement money to address kratom addiction. Here’s why.", "author": "Seth Pintar", "url": "https://mustangnews.net/slocounty-kratom-addiction-funding/", "points": ["$167,000 was approved from opioid settlement money.", "The money will fund an additional program coordinator for the County of San Luis Obispo Public Health Department.", "The department’s coordinator is tasked with reducing addiction to kratom."]}, {"id": "n2", "week": "Sept. 14–20, 2026", "section": "News", "date": "Sept. 17, 2026", "title": "Student reported to have fainted in Cal Poly classroom during heatwave", "author": "Rebecca Von Tersch", "url": "https://mustangnews.net/student-reported-to-have-fainted-in-cal-poly-classroom-during-heatwave/", "points": ["One student was reported to have fainted due to the heatwave.", "The student fainted on Wednesday, Sept. 9.", "Cal Poly did not formally cancel in-person classes during the heatwave."]}, {"id": "n3", "week": "Sept. 14–20, 2026", "section": "News", "date": "Sept. 16, 2026", "title": "College of Liberal Arts Advising Center has no in-person appointments until November", "author": "Emily Wang", "url": "https://mustangnews.net/cla-advising-delays-semester-conversion/", "points": ["CLA students need to wait until November for an in-person advising appointment.", "The Advising Center is operating with four advisors.", "The center says advising demand has increased during semester conversion."]}, {"id": "n4", "week": "Sept. 14–20, 2026", "section": "News", "date": "Sept. 15, 2026", "title": "San Luis Obispo launches survey to shape homelessness response plan", "author": "Nishita Mukherjee", "url": "https://mustangnews.net/slo-future-homelessness-plan/", "points": ["The community survey runs through Sept. 30.", "Responses will help shape the 2027–2031 Homelessness Strategic Response plan.", "The survey was launched by the City of San Luis Obispo."]}, {"id": "n5", "week": "Sept. 14–20, 2026", "section": "News", "date": "Sept. 14, 2026", "title": "Woods Humane Society holds their fourth annual Pets of the Year Calendar Contest fundraiser", "author": "Naneh Grigor", "url": "https://mustangnews.net/woods-humane-society-calendar-contest/", "points": ["The contest is in its fourth year.", "The top 10 fundraisers receive a full-month feature in the 2027 calendar.", "Every participant who raises at least $25 is included on a collage page."]}, {"id": "n6", "week": "Sept. 14–20, 2026", "section": "News", "date": "Sept. 14, 2026", "title": "Professors weigh in on Meta’s $17 billion settlement", "author": "Nishita Mukherjee", "url": "https://mustangnews.net/professors-weigh-in-on-metas-17-billion-settlement/", "points": ["Meta agreed to a $17 billion settlement involving 48 states and U.S. territories.", "The case included policy changes for minors.", "Cal Poly journalism professors Julie Lynem and Yan Shan discussed the case."]}, {"id": "n7", "week": "Sept. 14–20, 2026", "section": "News", "date": "Sept. 17, 2026", "title": "New bill prevents Artificial Intelligence from taking Cal State jobs", "author": "Joscelyn Martinez", "url": "https://mustangnews.net/new-bill-prevents-artificial-intelligence-from-taking-cal-state-jobs/", "points": ["Governor Gavin Newsom signed the bill.", "The bill concerns staff and faculty positions within the Cal State system.", "The bill addresses the use of artificial intelligence in university jobs."]}, {"id": "n8", "week": "Sept. 14–20, 2026", "section": "News", "date": "Sept. 10, 2026", "title": "Cal Poly ranks No. 1 for student outcomes and No. 10 overall among public universities in TIME list", "author": "Sam Fickett", "url": "https://mustangnews.net/cal-poly-time-rankings/", "points": ["Cal Poly ranked No. 10 among public universities and No. 38 overall.", "Cal Poly ranked first among public universities for student outcomes.", "TIME evaluated student outcomes, learning environment and attractiveness."]}, {"id": "c1", "week": "Sept. 7–13, 2026", "section": "Campus", "date": "Sept. 10, 2026", "title": "Cal Poly expands campus mental health services through new initiative", "author": "Kennedy Lin", "url": "https://mustangnews.net/cal-poly-expands-campus-mental-health-services-through-new-initiative/", "points": ["Campus Health and Wellbeing joined the Children and Youth Behavioral Health Initiative Reimbursement Program.", "The program can allow qualifying services to be reimbursed through state insurance providers.", "The initiative is designed to transform mental health services for students."]}, {"id": "c2", "week": "Sept. 14–20, 2026", "section": "Campus", "date": "Sept. 16, 2026", "title": "College of Liberal Arts Advising Center has no in-person appointments until November", "author": "Emily Wang", "url": "https://mustangnews.net/cla-advising-delays-semester-conversion/", "points": ["Four advisors are currently working in the CLA Advising Center.", "Two new graduate interns began training weeks into the academic year.", "Students can use Zoom drop-ins for advising support."]}, {"id": "c3", "week": "Sept. 7–13, 2026", "section": "Campus", "date": "Sept. 9, 2026", "title": "Cal Poly hires Artemis II pilot Victor Glover for full time administrative leadership role", "author": "Shayna Gayer and Mia Fessel", "url": "https://mustangnews.net/cal-poly-hires-artemis-ii-pilot-victor-glover/", "points": ["Victor Glover is a Cal Poly alumnus and Artemis II pilot.", "He returned to Cal Poly for a full-time administrative leadership role.", "Glover piloted NASA’s Artemis II mission around the moon."]}, {"id": "s1", "week": "Sept. 14–20, 2026", "section": "Sports", "date": "Sept. 20, 2026", "title": "Cal Poly Football stunned by San Diego on last-second field goal", "author": "Alex Kohm", "url": "https://mustangnews.net/usd-upsets-cal-poly/", "points": ["Cal Poly lost 38–35 to the University of San Diego.", "Emiliano Salazar kicked the game-winning 38-yard field goal with two seconds left.", "Anthony Grigsby Jr. threw three touchdown passes."]}, {"id": "s2", "week": "Sept. 14–20, 2026", "section": "Sports", "date": "Sept. 20, 2026", "title": "Cal Poly Volleyball falls to No. 8 Stanford, goes winless at SLO Classic", "author": "Samantha Roach", "url": "https://mustangnews.net/calpoly-volleyball-slo-classic/", "points": ["Cal Poly Volleyball lost all three matches at the SLO Classic.", "The Mustangs lost 3–1 to No. 8 Stanford in the final game.", "Cal Poly entered the event having won all three of its SLO Classic matches the previous year."]}, {"id": "s3", "week": "Sept. 14–20, 2026", "section": "Sports", "date": "Sept. 19, 2026", "title": "Murdoch’s career night pushes Cal Poly Volleyball to five sets against No. 12 Arizona State", "author": "Samantha Roach", "url": "https://mustangnews.net/cal-poly-loses-asu-duel/", "points": ["Kayla Murdoch recorded 20 kills against No. 12 Arizona State.", "She set a new single-game career high with 20 kills.", "Her previous record was 12 kills."]}, {"id": "s4", "week": "Sept. 14–20, 2026", "section": "Sports", "date": "Sept. 19, 2026", "title": "Cal Poly Men’s and Women’s Golf Open Season Up North", "author": "Jeremy Strause", "url": "https://mustangnews.net/cal-poly-golf-season-opener/", "points": ["Cal Poly Men’s Golf finished ninth at the Canadian Collegiate Open.", "Cal Poly Women’s Golf finished 13th at the Leadership and Golf Invitational.", "Rafael Bobo-Lloret finished 23rd overall in the men’s event."]}, {"id": "s5", "week": "Sept. 14–20, 2026", "section": "Sports", "date": "Sept. 16, 2026", "title": "What did San Jose State expose, and how is Cal Poly Football responding?", "author": "Joslen Jimenez", "url": "https://mustangnews.net/cal-poly-football-loss-san-jose-state/", "points": ["Cal Poly opened the season 2–0.", "San Jose State outscored Cal Poly 10–0 in the fourth quarter.", "The Mustangs were 2–1 after the loss."]}, {"id": "s6", "week": "Sept. 7–13, 2026", "section": "Sports", "date": "Sept. 13, 2026", "title": "Cal Poly Football suffers first loss of season against San Jose State", "author": "Liz Bennett", "url": "https://mustangnews.net/cal-poly-football-loses-sjsu/", "points": ["Cal Poly lost 30–20 to San Jose State.", "The Mustangs entered the game 2–0.", "Anthony Grigsby Jr. finished with 249 passing yards."]}, {"id": "o1", "week": "Sept. 14–20, 2026", "section": "Opinion", "date": "Sept. 14, 2026", "title": "Professors weigh in on Meta’s $17 billion settlement", "author": "Nishita Mukherjee", "url": "https://mustangnews.net/professors-weigh-in-on-metas-17-billion-settlement/", "points": ["Cal Poly journalism professors Julie Lynem and Yan Shan discussed the case.", "The settlement included policy changes for minors.", "The trial was settled on Aug. 26."]}, {"id": "o2", "week": "Sept. 14–20, 2026", "section": "Opinion", "date": "Sept. 17, 2026", "title": "Student reported to have fainted in Cal Poly classroom during heatwave", "author": "Rebecca Von Tersch", "url": "https://mustangnews.net/student-reported-to-have-fainted-in-cal-poly-classroom-during-heatwave/", "points": ["The story reported on how students and staff experienced extreme heat on campus.", "Cal Poly sent a Poly Alert advising students to stay hydrated and use cooler areas.", "Some professors moved classes online, but in-person classes were not formally canceled."]}];
+const SECTIONS = ["News","Campus","Sports","Opinion"];
+const STATE = {
+ selected: new Set(),
+ section: "All",
+ questions: [],
+ cover: "",
+ score: 0,
+ gameIndex: 0
+};
+
+function esc(v) {
+ return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function showView(view) {
+ document.getElementById("editorView").classList.toggle("hidden", view !== "editor");
+ document.getElementById("gameView").classList.toggle("hidden", view !== "game");
+ document.getElementById("editorTab").classList.toggle("active", view === "editor");
+ document.getElementById("gameTab").classList.toggle("active", view === "game");
+ if (view === "game") renderGame();
+}
+
+function init() {
+ const weeks = [...new Set(ARTICLES.map(a => a.week))];
+ document.getElementById("weekSelect").innerHTML = weeks.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join("");
+ document.getElementById("sectionChips").innerHTML = SECTIONS.map(s => `<button class="chip on" data-section="${esc(s)}" onclick="toggleSection('${s}')">${esc(s)}</button>`).join("");
+ document.getElementById("coverInput").addEventListener("change", handleCover);
+ const saved = localStorage.getItem("mustangTriviaPrototype");
+ if (saved) {
+   try {
+     const parsed = JSON.parse(saved);
+     STATE.questions = parsed.questions || [];
+     STATE.cover = parsed.cover || "";
+     document.getElementById("weekSelect").value = parsed.week || weeks[0];
+     if (STATE.cover) applyCover(STATE.cover);
+   } catch (_) {}
+ }
+ renderLibrary();
+ if (STATE.questions.length) renderDrafts();
+}
+
+function toggleSection(section) {
+ const btn = [...document.querySelectorAll(".chip")].find(b => b.dataset.section === section);
+ if (!btn) return;
+ btn.classList.toggle("on");
+ renderLibrary();
+}
+
+function activeSections() {
+ return new Set([...document.querySelectorAll(".chip.on")].map(b => b.dataset.section));
+}
+
+function syncSectionFromSelect() {
+ const value = document.getElementById("librarySection").value;
+ [...document.querySelectorAll(".chip")].forEach(btn => btn.classList.toggle("on", value === "All" || btn.dataset.section === value));
+}
+
+function renderLibrary() {
+ const week = document.getElementById("weekSelect").value;
+ const search = document.getElementById("searchBox").value.trim().toLowerCase();
+ const selectSection = document.getElementById("librarySection").value;
+ const sort = document.getElementById("sortOrder").value;
+ const secs = activeSections();
+
+ let list = ARTICLES.filter(a => a.week === week);
+ if (selectSection !== "All") list = list.filter(a => a.section === selectSection);
+ if (selectSection === "All") list = list.filter(a => secs.has(a.section));
+ if (search) list = list.filter(a => `${a.title} ${a.author} ${a.section}`.toLowerCase().includes(search));
+
+ list.sort((a,b) => sort === "newest" ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
+
+ const grouped = {};
+ for (const a of list) (grouped[a.section] ||= []).push(a);
+ const sections = Object.keys(grouped);
+
+ document.getElementById("articleList").innerHTML = sections.length ? sections.map(section => `
+   <div class="week-head">${esc(section)}</div>
+   ${grouped[section].map(a => `
+     <div class="article ${STATE.selected.has(a.id) ? "selected" : ""}" onclick="pickArticle('${a.id}')">
+       <input class="check" type="checkbox" ${STATE.selected.has(a.id) ? "checked" : ""} onclick="event.stopPropagation()" onchange="pickArticle('${a.id}', this.checked)">
+       <div><h4>${esc(a.title)}</h4><div class="meta">${esc(a.date)} · ${esc(a.author)} · ${esc(a.section)}</div><div class="small" style="margin-top:6px">${esc(a.points[0])}</div></div>
+       <a class="source" href="${esc(a.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open ↗</a>
+     </div>`).join("")}`).join("") : `<div class="small" style="padding:25px 5px;text-align:center">No Mustang News articles match those filters for this week.</div>`;
+
+ document.getElementById("selectedCount").textContent = `${STATE.selected.size} selected`;
+ const selectedTitles = ARTICLES.filter(a => STATE.selected.has(a.id)).map(a => a.title);
+ const bar = document.getElementById("selectedBar");
+ if (selectedTitles.length) {
+   bar.classList.remove("hidden");
+   bar.textContent = selectedTitles.length <= 3 ? "Selected: " + selectedTitles.join(" • ") : `Selected: ${selectedTitles.length} articles`;
+ } else bar.classList.add("hidden");
+}
+
+function pickArticle(id, forced) {
+ const on = typeof forced === "boolean" ? forced : !STATE.selected.has(id);
+ if (on) STATE.selected.add(id); else STATE.selected.delete(id);
+ renderLibrary();
+}
+
+function starterQuestion(article, point) {
+ const title = article.title;
+ const p = point;
+ let q, answer, choices;
+
+ if (article.id === "n1") { q = "How much opioid settlement money did San Luis Obispo County approve for work addressing kratom addiction?"; answer = "$167,000"; choices = ["$67,000","$167,000","$367,000","$1.67 million"]; }
+ else if (article.id === "n4") { q = "What years will San Luis Obispo's next Homelessness Strategic Response plan cover?"; answer = "2027–2031"; choices = ["2025–2029","2026–2030","2027–2031","2028–2032"]; }
+ else if (article.id === "n5") { q = "How many top fundraisers receive a full-month feature in the 2027 Woods Humane Society calendar?"; answer = "10"; choices = ["5","10","25","50"]; }
+ else if (article.id === "n6") { q = "How large was the settlement involving Meta described in Mustang News?"; answer = "$17 billion"; choices = ["$1.7 billion","$7 billion","$17 billion","$70 billion"]; }
+ else if (article.id === "n8") { q = "What overall rank did Cal Poly receive among public universities in TIME's list?"; answer = "No. 10"; choices = ["No. 1","No. 5","No. 10","No. 38"]; }
+ else if (article.id === "s1") { q = "What was the final score of Cal Poly football's game against San Diego?"; answer = "38–35"; choices = ["38–35","35–31","30–20","28–24"]; }
+ else if (article.id === "s2") { q = "How many matches did Cal Poly Volleyball win at the SLO Classic?"; answer = "0"; choices = ["0","1","2","3"]; }
+ else if (article.id === "s3") { q = "How many kills did Kayla Murdoch record against No. 12 Arizona State?"; answer = "20"; choices = ["12","16","20","24"]; }
+ else if (article.id === "s4") { q = "Where did Cal Poly Men's Golf finish at the Canadian Collegiate Open?"; answer = "Ninth"; choices = ["Fifth","Ninth","13th","23rd"]; }
+ else if (article.id === "s5") { q = "What record did Cal Poly football have after its loss to San Jose State?"; answer = "2–1"; choices = ["1–2","2–0","2–1","3–1"]; }
+ else if (article.id === "s6") { q = "How many passing yards did Anthony Grigsby Jr. have against San Jose State?"; answer = "249"; choices = ["149","199","249","299"]; }
+ else if (article.id === "c1") { q = "Which new reimbursement initiative did Campus Health and Wellbeing join?"; answer = "Children and Youth Behavioral Health Initiative Reimbursement Program"; choices = ["Cal Poly Wellness Grant","Children and Youth Behavioral Health Initiative Reimbursement Program","Campus Care Expansion Fund","Golden State Student Health Program"]; }
+ else if (article.id === "c3") { q = "Which NASA mission did Cal Poly alumnus Victor Glover pilot around the moon?"; answer = "Artemis II"; choices = ["Artemis I","Artemis II","Artemis III","Apollo 11"]; }
+ else if (article.id === "n2") { q = "How many students did Cal Poly confirm had fainted because of the heatwave?"; answer = "One"; choices = ["One","Two","Five","No students"]; }
+ else if (article.id === "n3") { q = "Until when did the CLA Advising Center say students needed to wait for an in-person appointment?"; answer = "November"; choices = ["October","November","December","Winter quarter"]; }
+ else { q = `According to Mustang News, which detail was reported in “${title}”?`; answer = p; choices = [p, "The article reported a different result.", "The story was published in a previous academic year.", "Mustang News did not report this detail."]; }
+
+ return {question:q, answer, choices, correctIndex: choices.indexOf(answer), type:"Multiple choice"};
+}
+
+function generateQuiz() {
+ const n = Number(document.getElementById("questionCount").value);
+ const chosen = ARTICLES.filter(a => STATE.selected.has(a.id));
+ if (!chosen.length) { alert("Select at least one Mustang News article first."); return; }
+
+ const qs = [];
+ for (let i=0;i<n;i++) {
+   const a = chosen[i % chosen.length];
+   const point = a.points[i % a.points.length];
+   const base = starterQuestion(a, point);
+   qs.push({articleId:a.id, article:a.title, section:a.section, ...base});
+ }
+ STATE.questions = qs;
+ renderDrafts();
+ document.getElementById("draftPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function setCorrect(qi, oi) {
+ if (!STATE.questions[qi]) return;
+ STATE.questions[qi].correctIndex = oi;
+ STATE.questions[qi].answer = STATE.questions[qi].choices[oi];
+ renderDrafts();
+}
+
+function addOption(qi) {
+ STATE.questions[qi].choices.push("");
+ renderDrafts();
+}
+
+function removeOption(qi, oi) {
+ const q = STATE.questions[qi];
+ if (q.choices.length <= 2) { alert("Keep at least two answer options."); return; }
+ q.choices.splice(oi,1);
+ if (q.correctIndex === oi) q.correctIndex = 0;
+ else if (q.correctIndex > oi) q.correctIndex--;
+ q.answer = q.choices[q.correctIndex];
+ renderDrafts();
+}
+
+function updateQuestion(qi, field, value) {
+ STATE.questions[qi][field] = value;
+}
+
+function updateChoice(qi, oi, value) {
+ STATE.questions[qi].choices[oi] = value;
+ if (STATE.questions[qi].correctIndex === oi) STATE.questions[qi].answer = value;
+}
+
+function renderDrafts() {
+ document.getElementById("draftPanel").classList.remove("hidden");
+ document.getElementById("drafts").innerHTML = STATE.questions.map((q,i) => `
+ <div class="question">
+   <div class="qheader"><span class="tag">${esc(q.section)} · ${esc(q.type)}</span><span class="small">Q${i+1}</span></div>
+   <div style="margin-top:12px"><label>Question</label><textarea oninput="updateQuestion(${i},'question',this.value)">${esc(q.question)}</textarea></div>
+   <div style="margin-top:12px"><label>Answer options — select the correct one</label>
+      ${q.choices.map((c,j)=>`
+        <div class="option-row">
+          <input type="radio" name="correct-${i}" ${j===q.correctIndex ? "checked":""} onchange="setCorrect(${i},${j})">
+          <input value="${esc(c)}" placeholder="Answer option ${j+1}" oninput="updateChoice(${i},${j},this.value)">
+          <button type="button" class="btn secondary" onclick="removeOption(${i},${j})">Remove</button>
+        </div>`).join("")}
+      <button type="button" class="btn secondary" style="margin-top:9px" onclick="addOption(${i})">+ Add answer option</button>
+   </div>
+   <div class="row" style="margin-top:12px">
+      <div><label>Source article</label><input value="${esc(q.article)}" oninput="updateQuestion(${i},'article',this.value)"></div>
+      <div><label>Question type</label><select onchange="updateQuestion(${i},'type',this.value)"><option ${q.type==="Multiple choice"?"selected":""}>Multiple choice</option><option ${q.type==="True/False"?"selected":""}>True/False</option></select></div>
+   </div>
+   <div class="small" style="margin-top:10px">Correct answer: <strong>${esc(q.answer)}</strong></div>
+ </div>`).join("");
+}
+
+function publishQuiz() {
+ for (const q of STATE.questions) {
+   if (!q.question.trim() || q.choices.length < 2 || q.choices.some(c => !String(c).trim())) {
+     alert("Complete every question and answer option before publishing.");
+     return;
+   }
+ }
+ const payload = {
+   week: document.getElementById("weekSelect").value,
+   questions: STATE.questions,
+   notes: document.getElementById("notes").value,
+   cover: STATE.cover
+ };
+ localStorage.setItem("mustangTriviaPrototype", JSON.stringify(payload));
+ alert("Quiz published. Open Published Game to preview it.");
+ showView("game");
+}
+
+function handleCover(e) {
+ const file = e.target.files[0];
+ if (!file) return;
+ const reader = new FileReader();
+ reader.onload = () => { STATE.cover = reader.result; applyCover(STATE.cover); };
+ reader.readAsDataURL(file);
+}
+
+function applyCover(data) {
+ document.getElementById("gameCover").style.backgroundImage = `url("${data}")`;
+}
+
+function renderGame() {
+ const saved = JSON.parse(localStorage.getItem("mustangTriviaPrototype") || "null");
+ const qs = saved?.questions?.length ? saved.questions : STATE.questions;
+ if (saved) {
+   document.getElementById("gameTitle").textContent = `${saved.week} News Quiz`;
+   if (saved.cover) applyCover(saved.cover);
+ }
+ const area = document.getElementById("gameArea");
+ if (!qs.length) {
+   area.innerHTML = `<div class="quiz-card"><h2>No quiz published yet</h2><p class="small">Build and publish a quiz from the Editor tab.</p></div>`;
+   return;
+ }
+ STATE.gameIndex = 0; STATE.score = 0;
+ drawGameQuestion(qs);
+}
+
+function drawGameQuestion(qs) {
+ const q = qs[STATE.gameIndex];
+ const area = document.getElementById("gameArea");
+ area.innerHTML = `<div class="quiz-card">
+   <div class="scoreline"><span>Question ${STATE.gameIndex+1} of ${qs.length}</span><span>Score: ${STATE.score}</span></div>
+   <div class="quiz-q">${esc(q.question)}</div>
+   <div>${q.choices.map((c,i)=>`<button class="choice" onclick="chooseAnswer(this,${i},${q.correctIndex},${qs.length})">${esc(c)}</button>`).join("")}</div>
+   <div id="gameFeedback" class="small" style="margin-top:12px"></div>
+ </div>`;
+}
+
+window.chooseAnswer = function(btn, chosenIndex, correctIndex, total) {
+ document.querySelectorAll(".choice").forEach(b => b.disabled = true);
+ const correct = chosenIndex === correctIndex;
+ btn.classList.add(correct ? "correct" : "wrong");
+ if (correct) STATE.score++;
+ const feedback = document.getElementById("gameFeedback");
+ feedback.textContent = correct ? "Correct!" : "Not quite.";
+ const saved = JSON.parse(localStorage.getItem("mustangTriviaPrototype") || "null");
+ const qs = saved?.questions || STATE.questions;
+ setTimeout(() => {
+   STATE.gameIndex++;
+   if (STATE.gameIndex < qs.length) drawGameQuestion(qs);
+   else {
+     document.getElementById("gameArea").innerHTML = `<div class="quiz-card" style="text-align:center">
+       <h2>Quiz complete</h2><div style="font-size:46px;font-weight:900;margin:12px 0">${STATE.score}/${qs.length}</div>
+       <p class="small">Thanks for playing Mustang News Weekly Trivia.</p>
+       <button class="btn primary" onclick="renderGame()">Play again</button>
+     </div>`;
+   }
+ }, 700);
+};
+
+init();
+</script>
+</body>
+</html>
